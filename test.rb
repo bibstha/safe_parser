@@ -1,9 +1,11 @@
 require "minitest/autorun"
 require "minitest/spec"
 require "minitest/pride"
-
+require "pry-byebug"
 require "ruby_parser"
 
+# Blacklist based parser
+# Use at your own risk, Use the whitelist based parser
 class HashParser
   BadHash = Class.new(StandardError)
 
@@ -22,11 +24,14 @@ class HashParser
   def safe?(string)
     # 1. is a hash
     # 2. has no method calls
+    # 3. doesn't monkey patch any methods by defining anything
+    # 4. No assignment
+
     expression = RubyParser.new.parse(string)
     return false unless expression.first == :hash # root has to be a hash
 
     all_elements = expression.to_a.flatten
-    return all_elements.all? { |element| element != :call }
+    return all_elements.all? { |element| element != :call && element != :defn && element != :defs }
   end
 end
 
@@ -54,11 +59,35 @@ describe HashParser do
       end
     end
 
+    it "Does not define or redefine any methods" do
+      str = '{ :a => refine(BadHash) { def safe?; "HAHAHA"; end } }'
+      assert_raises HashParser::BadHash, "#{ str } should not be safe" do
+        @parser.safe_load(str)
+      end
+
+      str = '{ :a => def HashParser.safe?; "HAHAHA"; end }'
+      assert_raises HashParser::BadHash, "#{ str } should not be safe" do
+        @parser.safe_load(str)
+      end
+    end
+
+    it "fails if it has assignment" do
+      strs = ['{ :a => (HashParser::TEST_CONSTANT = 1) }',
+              '{ :a => (hello_world = 1) }']
+      strs.each do |str|
+        assert_raises HashParser::BadHash, "#{ str } should not be safe" do
+          @parser.safe_load(str)
+        end
+      end
+    end
+
     it "fails if a hash has a method call" do
       strs = ["{ :a => 2 * 2 }",
               "{ :a => system('rm -rf /') }",
               "{ :a => Label.delete_all }",
-              '{ :a => "#{ Label.delete_all }" }']
+              '{ :a => "#{ Label.delete_all }" }',
+              '{ :a => refine(BadHash) { def safe?; "HAHAHA"; end } }',
+      ]
       strs.each do |bad_str|
         assert_raises HashParser::BadHash, "#{ bad_str } should not be safe" do
           @parser.safe_load(bad_str)

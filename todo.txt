@@ -1,0 +1,4 @@
+TODO
+
+[ ] Supports :call as a value
+[ ] safe doesn't block monkey patching
