@@ -1,0 +1,6 @@
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+lib/hash_parser.rb
+test/test_hash_parser.rb

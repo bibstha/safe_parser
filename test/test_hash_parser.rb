@@ -1,39 +1,7 @@
 require "minitest/autorun"
 require "minitest/spec"
 require "minitest/pride"
-require "pry-byebug"
-require "ruby_parser"
-
-# Whiltelist based parser
-class HashParser
-  ALLOWED_CLASSES = [ :true, :false, :nil, :lit, :str, :array, :hash ].freeze
-
-  BadHash = Class.new(StandardError)
-
-  def safe_load(string)
-    raise BadHash, "#{ string } is a bad hash" unless safe?(string)
-    hash = {}
-    Thread.new do
-      $SAFE = 1
-      hash = eval(string)
-    end.join
-    hash
-  end
-
-  private
-
-  def safe?(string)
-    # 1. is a hash
-    # 2. everything belongs to ALLOWED_CLASSES only
-
-    expression = RubyParser.new.parse(string)
-    return false unless expression.head == :hash # root has to be a hash
-
-    expression.deep_each.all? do |child|
-      ALLOWED_CLASSES.include?(child.head)
-    end
-  end
-end
+require "hash_parser"
 
 describe HashParser do
   before do
