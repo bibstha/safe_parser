@@ -18,7 +18,7 @@ describe HashParser do
       end
     end
 
-    it "fails if there are more than one expression, it fails" do
+    it "fails if there are more than one expression" do
       strs = ["{ :a => 1 }; 'hello'", "{ :a => 1 }\n{ :b => 2 }"]
       strs.each do |bad_str|
         assert_raises HashParser::BadHash, "#{ bad_str } should not be safe" do
