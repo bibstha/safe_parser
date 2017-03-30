@@ -2,7 +2,7 @@ require "ruby_parser"
 
 # Whiltelist based hash string parser
 class HashParser
-  VERSION = "0.0.1"
+  VERSION = "0.0.2"
 
   # a literal is strings, regex, numeric
   # https://github.com/seattlerb/ruby_parser/blob/master/lib/ruby19_parser.y#L890
