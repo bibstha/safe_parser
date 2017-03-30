@@ -11,6 +11,18 @@ Parses a hash string of the format `'{ :a => "something" }'` into an actual ruby
 This is useful when you by mistake serialize hashes and save it in database column or a text file and you want to
 convert them back to hashes without the security issues of executing `eval(hash_string)`.
 
+By default only following classes are allowed to be deserialized:
+
+* TrueClass
+* FalseClass
+* NilClass
+* Numeric
+* String
+* Array
+* Hash
+
+A HashParser::BadHash exception is thrown if unserializable values are present.
+
 == FEATURES/PROBLEMS:
 
 * Any potential security issues?
@@ -18,6 +30,10 @@ convert them back to hashes without the security issues of executing `eval(hash_
 == INSTALL:
 
 * Add to Gemfile: `gem 'hash_parser'`
+
+== TODO:
+
+* Allow objects of certain types to be deserialized
 
 == LICENSE:
 

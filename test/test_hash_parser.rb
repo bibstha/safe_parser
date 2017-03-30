@@ -51,6 +51,7 @@ describe HashParser do
 
     it "fails if a hash has a method call" do
       strs = ["{ :a => 2 * 2 }",
+              "{ :a => SOME_CONST }",
               "{ :a => system('rm -rf /') }",
               "{ :a => Label.delete_all }",
               '{ :a => "#{500}" }',

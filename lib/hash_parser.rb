@@ -4,6 +4,8 @@ require "ruby_parser"
 class HashParser
   VERSION = "0.0.1"
 
+  # a literal is strings, regex, numeric
+  # https://github.com/seattlerb/ruby_parser/blob/master/lib/ruby19_parser.y#L890
   ALLOWED_CLASSES = [ :true, :false, :nil, :lit, :str, :array, :hash ].freeze
 
   BadHash = Class.new(StandardError)
