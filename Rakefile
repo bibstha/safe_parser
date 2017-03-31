@@ -2,7 +2,7 @@
 
 require 'hoe'
 
-Hoe.spec 'hash_parser' do
+Hoe.spec 'safe_parser' do
   developer 'Bibek Shrestha', 'bibekshrestha@gmail.com'
 
   license "MIT"
