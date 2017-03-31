@@ -9,22 +9,30 @@ class HashParser
   ALLOWED_CLASSES = [ :true, :false, :nil, :lit, :str, :array, :hash ].freeze
 
   BadHash = Class.new(StandardError)
+  attr_reader :string
 
-  def safe_load(string)
-    raise BadHash, "#{ string } is a bad hash" unless safe?(string)
+  def initialize(string)
+    @string = string
+  end
+
+  def safe_load
+    raise BadHash, "#{ string } is a bad hash" unless safe?
     eval(string)
   end
 
   private
 
-  def safe?(string)
-    expression = RubyParser.new.parse(string)
-    return false unless expression.head == :hash # root has to be a hash
+  def expressions
+    @expressions ||= RubyParser.new.parse(string)
+  end
 
-    # can be optimized to do an ACTUAL_CLASSES - ALLOWED_CLASSES == []
-    expression.deep_each.all? do |child|
-      ALLOWED_CLASSES.include?(child.head)
+  def safe?
+    return false unless ALLOWED_CLASSES.include?(expressions.head)
+
+    # deep_each will start from the second node, so we need to validte the head
+    # first by itself.
+    expressions.deep_each.all? do |expression|
+      ALLOWED_CLASSES.include?(expression.head)
     end
   end
 end
-
