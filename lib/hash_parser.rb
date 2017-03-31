@@ -17,7 +17,7 @@ class HashParser
 
   def safe_load
     raise BadHash, "#{ string } is a bad hash" unless safe?
-    eval(string)
+    parse(expressions)
   end
 
   private
@@ -34,5 +34,28 @@ class HashParser
     expressions.deep_each.all? do |expression|
       ALLOWED_CLASSES.include?(expression.head)
     end
+  end
+
+  def parse(expression)
+    case expression.head
+    when :hash
+      Hash[*parse_into_array(expression.values)]
+    when :array
+      parse_into_array(expression.values)
+    when :true
+      true
+    when :false
+      false
+    when :nil
+      nil
+    when :lit, :str
+      expression.value
+    else
+      raise BadHash, "#{ string } is a bad hash"
+    end
+  end
+
+  def parse_into_array(expression)
+    expression.map { |child_expression| parse(child_expression) }
   end
 end
