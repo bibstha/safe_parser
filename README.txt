@@ -1,17 +1,51 @@
-= blah
+= SafeParser
 
-home  :: https://github.com/bibstha/ruby_hash_parser
-code  :: https://github.com/bibstha/ruby_hash_parser
-bugs  :: https://github.com/bibstha/ruby_hash_parser
-... etc ...
+home  :: https://github.com/bibstha/safe_parser
+code  :: https://github.com/bibstha/safe_parser
+bugs  :: https://github.com/bibstha/safe_parser
 
 == DESCRIPTION:
 
-Parses a hash string of the format `'{ :a => "something" }'` into an actual ruby hash object `{ a: "something" }`.
-This is useful when you by mistake serialize hashes and save it in database column or a text file and you want to
-convert them back to hashes without the security issues of executing `eval(hash_string)`.
+Parses a ruby literal from string to its ruby value.
 
-By default only following classes are allowed to be deserialized:
+Eg:
+
+```
+val = SafeParser.new.safe_load('"this is a string"')
+assert_equal "this is a string", val
+
+val = SafeParser.new.safe_load(':my_symbol')
+assert_equal :my_symbol, val
+
+val = SafeParser.new.safe_load('123')
+assert_equal 123, val
+
+val = SafeParser.new.safe_load('nil')
+assert_nil val
+
+val = SafeParser.new.safe_load('true')
+assert val
+
+val = SafeParser.new.safe_load('false')
+refute val
+
+val = SafeParser.new.safe_load('[1, "my_str", :my_sym, 12.25, ["sub_array"], { test: "hash" }]')
+assert_equal [1, "my_str", :my_sym, 12.25, ["sub_array"], { test: "hash" } ], val
+
+val = SafeParser.new.safe_load('{"key_1": "value", key_2: 123}')
+assert_equal {"key_1": "value", key_2: 123 }, val
+
+# Raises exceptions when the ruby code has executable part
+assert_raises(SafeParser::UnsafeError) do
+  val = SafeParser.new.safe_load('{ key: "string_with_exec#{2 + 2}" }')
+end
+
+assert_raises(SafeParser::UnsafeError) do
+  val = SafeParser.new.safe_load('system("ls")')
+end
+```
+
+Safe literals are any of the following:
 
 * TrueClass
 * FalseClass
@@ -21,32 +55,26 @@ By default only following classes are allowed to be deserialized:
 * Array
 * Hash
 
-A HashParser::BadHash exception is thrown if unserializable values are present.
+Array and Hash can have any literals inside or another Array or Hash.
 
-== FEATURES/PROBLEMS:
-
-* Any potential security issues?
+If the ruby code contains anything besides the literals, it throws a `SafeHash::UnsafeError` Exception.
 
 == INSTALL:
 
-* Add to Gemfile: `gem 'hash_parser'`
+* Add to Gemfile: `gem 'safe_parser'`
 
 == DEVELOPERS:
 
-    require 'hash_parser'
+    require 'safe_parser'
 
     # This successfully parses the hash
     a = "{ :key_a => { :key_1a => 'value_1a', :key_2a => 'value_2a' },
            :key_b => { :key_1b => 'value_1b' } }"
-    p HashParser.new.safe_load(a)
+    p SafeParser.new.safe_load(a)
 
-    # This throws a HashParser::BadHash exception
+    # This throws a SafeParser::BadHash exception
     a = "{ :key_a => system('ls') }"
-    p HashParser.new.safe_load(a)
-
-== TODO:
-
-* Allow objects of certain types to be deserialized
+    p SafeParser.new.safe_load(a)
 
 == LICENSE:
 
