@@ -1,47 +1,47 @@
-= SafeParser
+# SafeParser
 
-home  :: https://github.com/bibstha/safe_parser
-code  :: https://github.com/bibstha/safe_parser
-bugs  :: https://github.com/bibstha/safe_parser
+ * home  :: https://github.com/bibstha/safe_parser
+ * code  :: https://github.com/bibstha/safe_parser
+ * bugs  :: https://github.com/bibstha/safe_parser
 
-== DESCRIPTION:
+## DESCRIPTION:
 
 Parses a ruby literal from string to its ruby value.
 
 Eg:
 
 ```
-val = SafeParser.new.safe_load('"this is a string"')
+val = SafeParser.new('"this is a string"').safe_load
 assert_equal "this is a string", val
 
-val = SafeParser.new.safe_load(':my_symbol')
+val = SafeParser.new(':my_symbol').safe_load
 assert_equal :my_symbol, val
 
-val = SafeParser.new.safe_load('123')
+val = SafeParser.new('123').safe_load
 assert_equal 123, val
 
-val = SafeParser.new.safe_load('nil')
+val = SafeParser.new('nil').safe_load
 assert_nil val
 
-val = SafeParser.new.safe_load('true')
+val = SafeParser.new('true').safe_load
 assert val
 
-val = SafeParser.new.safe_load('false')
+val = SafeParser.new('false').safe_load
 refute val
 
-val = SafeParser.new.safe_load('[1, "my_str", :my_sym, 12.25, ["sub_array"], { test: "hash" }]')
+val = SafeParser.new('[1, "my_str", :my_sym, 12.25, ["sub_array"], { test: "hash" }]').safe_load
 assert_equal [1, "my_str", :my_sym, 12.25, ["sub_array"], { test: "hash" } ], val
 
-val = SafeParser.new.safe_load('{"key_1": "value", key_2: 123}')
+val = SafeParser.new('{"key_1": "value", key_2: 123}').safe_load
 assert_equal {"key_1": "value", key_2: 123 }, val
 
 # Raises exceptions when the ruby code has executable part
 assert_raises(SafeParser::UnsafeError) do
-  val = SafeParser.new.safe_load('{ key: "string_with_exec#{2 + 2}" }')
+  val = SafeParser.new('{ key: "string_with_exec#{2 + 2}" }').safe_load
 end
 
 assert_raises(SafeParser::UnsafeError) do
-  val = SafeParser.new.safe_load('system("ls")')
+  val = SafeParser.new('system("ls")').safe_load
 end
 ```
 
@@ -59,24 +59,24 @@ Array and Hash can have any literals inside or another Array or Hash.
 
 If the ruby code contains anything besides the literals, it throws a `SafeHash::UnsafeError` Exception.
 
-== INSTALL:
+## INSTALL:
 
 * Add to Gemfile: `gem 'safe_parser'`
 
-== DEVELOPERS:
+## DEVELOPERS:
 
     require 'safe_parser'
 
     # This successfully parses the hash
     a = "{ :key_a => { :key_1a => 'value_1a', :key_2a => 'value_2a' },
            :key_b => { :key_1b => 'value_1b' } }"
-    p SafeParser.new.safe_load(a)
+    p SafeParser.new(a).safe_load
 
     # This throws a SafeParser::BadHash exception
     a = "{ :key_a => system('ls') }"
-    p SafeParser.new.safe_load(a)
+    p SafeParser.new(a).safe_load
 
-== LICENSE:
+## LICENSE:
 
 (The MIT License)
 
